@@ -31,7 +31,7 @@ type ResponseWriter interface {
 	Write([]byte) (int, error)
 	
 	// Write raw data to the connection.
-	WriteRaw([]byte) (int, error)
+	WriteRaw(string)
 
 	// WriteHeader sends an ICAP response header with status code.
 	// Then it sends an HTTP header if httpMessage is not nil.
