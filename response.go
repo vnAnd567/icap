@@ -29,6 +29,9 @@ type ResponseWriter interface {
 	// If WriteHeader has not yet been called, Write calls WriteHeader(http.StatusOK, nil)
 	// before writing the data.
 	Write([]byte) (int, error)
+	
+	// Write raw data to the connection.
+	WriteRaw([]byte) (int, error)
 
 	// WriteHeader sends an ICAP response header with status code.
 	// Then it sends an HTTP header if httpMessage is not nil.
@@ -58,6 +61,11 @@ func (w *respWriter) Write(p []byte) (n int, err error) {
 		return 0, errors.New("called Write() on an icap.ResponseWriter that should not have a body")
 	}
 	return w.cw.Write(p)
+}
+
+func (w *respWriter) WriteRaw(p string) {
+	bw := w.conn.buf.Writer
+	io.WriteString(bw, p)
 }
 
 func (w *respWriter) WriteHeader(code int, httpMessage interface{}, hasBody bool) {
