@@ -45,6 +45,7 @@ type respWriter struct {
 	req         *Request       // the request that is being responded to
 	header      http.Header    // the ICAP header to write for the response
 	wroteHeader bool           // true if the headers have already been written
+	wroteRaw    bool	   // true if raw data was written to the connection
 	cw          io.WriteCloser // the chunked writer used to write the body
 }
 
@@ -66,6 +67,7 @@ func (w *respWriter) Write(p []byte) (n int, err error) {
 func (w *respWriter) WriteRaw(p string) {
 	bw := w.conn.buf.Writer
 	io.WriteString(bw, p)
+	w.wroteRaw = true
 }
 
 func (w *respWriter) WriteHeader(code int, httpMessage interface{}, hasBody bool) {
@@ -148,7 +150,7 @@ func (w *respWriter) finishRequest() {
 		w.WriteHeader(http.StatusOK, nil, false)
 	}
 
-	if w.cw != nil {
+	if w.cw != nil && !w.wroteRaw {
 		w.cw.Close()
 		w.cw = nil
 		io.WriteString(w.conn.buf, "\r\n")
