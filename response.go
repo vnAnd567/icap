@@ -179,6 +179,7 @@ func httpRequestHeader(req *http.Request) (hdr []byte, err error) {
 	uri := req.URL.String()
 
 	fmt.Fprintf(buf, "%s %s %s\r\n", valueOrDefault(req.Method, "GET"), uri, valueOrDefault(req.Proto, "HTTP/1.1"))
+	if 
 	req.Header.WriteSubset(buf, map[string]bool{
 		"Transfer-Encoding": true,
 		"Content-Length":    true,
@@ -206,10 +207,14 @@ func httpResponseHeader(resp *http.Response) (hdr []byte, err error) {
 		proto = "HTTP/1.1"
 	}
 	fmt.Fprintf(buf, "%s %d %s\r\n", proto, resp.StatusCode, text)
-	resp.Header.WriteSubset(buf, map[string]bool{
-		"Transfer-Encoding": true,
-		"Content-Length":    true,
-	})
+	if _, xIcap206Exists:= resp.Header["X-Icap-206"] ; xIcap206Exists {
+		resp.Header.WriteSubset(buf, nil)
+	} else {
+		resp.Header.WriteSubset(buf, map[string]bool{
+			"Transfer-Encoding": true,
+			"Content-Length":    true,
+		})
+	}
 	io.WriteString(buf, "\r\n")
 
 	return buf.Bytes(), nil
