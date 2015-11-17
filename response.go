@@ -208,7 +208,7 @@ func httpResponseHeader(resp *http.Response) (hdr []byte, err error) {
 	}
 	fmt.Fprintf(buf, "%s %d %s\r\n", proto, resp.StatusCode, text)
 	if _, xIcap206Exists:= resp.Header["X-Icap-206"] ; xIcap206Exists {
-		resp.Header.WriteSubset(buf, nil)
+		resp.Header.Write(buf)
 	} else {
 		resp.Header.WriteSubset(buf, map[string]bool{
 			"Transfer-Encoding": true,
