@@ -112,7 +112,6 @@ func (c *conn) serve() {
 
 //		w = new(respWriter)
 //		w.conn =  c
-		log.Println(w)
 		w.req = new(Request)
 		w.req.Method = "ERRDUMMY"
 		w.req.RawURL = "/"

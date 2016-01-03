@@ -60,6 +60,9 @@ func toGolang(w icap.ResponseWriter, req *icap.Request) {
 			// Return the request unmodified.
 			w.WriteHeader(204, nil, false)
 		}
+	case "ERRDUMMY":
+		w.WriteHeader(400, nil, false)
+		fmt.Println("Malformed request")
 	default:
 		w.WriteHeader(405, nil, false)
 		fmt.Println("Invalid request method")
