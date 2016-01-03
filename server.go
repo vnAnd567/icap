@@ -13,6 +13,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"runtime/debug"
 	"time"
 )
@@ -116,6 +117,7 @@ func (c *conn) serve() {
 		w.req.Method = "ERRDUMMY"
 		w.req.RawURL = "/"
 		w.req.Proto = "ICAP/1.0"
+		w.req.URL, _ = url.ParseRequestURI("icap://localhost/")
 	}
 
 	c.handler.ServeICAP(w, w.req)
