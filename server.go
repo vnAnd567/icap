@@ -108,6 +108,7 @@ func (c *conn) serve() {
 		log.Println("error while reading request:", err)
 //		c.rwc.Close()
 //		return
+		w = new(respWriter)
 		w.conn =  c
 		w.req = new(Request)
 		w.req.Method = "ERRDUMMY"

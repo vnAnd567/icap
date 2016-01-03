@@ -18,7 +18,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/jrossi/go-icap"
+	"github.com/elico/icap"
 	"net/http"
 	"os"
 )
@@ -30,7 +30,7 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir(os.Getenv("HOME")+"/Sites")))
 
 	icap.HandleFunc("/golang", toGolang)
-	icap.ListenAndServe(":11344", icap.HandlerFunc(toGolang))
+	icap.ListenAndServe(":1344", icap.HandlerFunc(toGolang))
 }
 
 func toGolang(w icap.ResponseWriter, req *icap.Request) {
