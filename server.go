@@ -108,8 +108,10 @@ func (c *conn) serve() {
 		log.Println("error while reading request:", err)
 //		c.rwc.Close()
 //		return
-		w = new(respWriter)
-		w.conn =  c
+
+//		w = new(respWriter)
+//		w.conn =  c
+		log.Println(w)
 		w.req = new(Request)
 		w.req.Method = "ERRDUMMY"
 		w.req.RawURL = "/"

@@ -169,7 +169,7 @@ func ReadRequest(b *bufio.ReadWriter) (req *Request, err error) {
 	if rawReqHdr != nil {
 		req.Request, err = http.ReadRequest(bufio.NewReader(bytes.NewBuffer(rawReqHdr)))
 		if err != nil {
-			return nil, fmt.Errorf("error while parsing HTTP request: %v", err)
+			return req, fmt.Errorf("error while parsing HTTP request: %v", err)
 		}
 
 		if req.Method == "REQMOD" {
