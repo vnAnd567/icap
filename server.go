@@ -100,12 +100,19 @@ func (c *conn) serve() {
 		buf.Write(debug.Stack())
 		log.Print(buf.String())
 	}()
-
+	var w *respWriter
 	w, err := c.readRequest()
+	// In a case of parsing error there should be an option to handle a dummy request to not fail the whole service.
+
 	if err != nil {
 		log.Println("error while reading request:", err)
-		c.rwc.Close()
-		return
+//		c.rwc.Close()
+//		return
+		w.conn =  c
+		w.req = new(Request)
+		w.req.Method = "ERRDUMMY"
+		w.req.RawURL = "/"
+		w.req.Proto = "ICAP/1.0"
 	}
 
 	c.handler.ServeICAP(w, w.req)
