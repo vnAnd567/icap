@@ -62,7 +62,8 @@ func newConn(rwc net.Conn, handler Handler) (c *conn, err error) {
 func (c *conn) readRequest() (w *respWriter, err error) {
 	var req *Request
 	if req, err = ReadRequest(c.buf); err != nil {
-		return nil, err
+		//return req, err
+		;
 	}
 
 	req.RemoteAddr = c.remoteAddr
@@ -71,7 +72,7 @@ func (c *conn) readRequest() (w *respWriter, err error) {
 	w.conn = c
 	w.req = req
 	w.header = make(http.Header)
-	return w, nil
+	return w, err
 }
 
 // Close the connection.
