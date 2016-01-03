@@ -110,6 +110,10 @@ func (c *conn) serve() {
 	if err != nil {
 		log.Println("error while reading request:", err)
 		log.Println("error while reading request:", w)
+		log.Println("error while reading request:", w.conn)
+		log.Println("error while reading request:", w.req)
+		log.Println("error while reading request:", w.header)
+	
 //		c.rwc.Close()
 //		return
 		if w == nil {
