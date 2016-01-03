@@ -121,8 +121,9 @@ func (c *conn) serve() {
 		w.req.RawURL = "/"
 		w.req.Proto = "ICAP/1.0"
 		w.req.URL, _ = url.ParseRequestURI("icap://localhost/")
-		w.req.Header = *new(textproto.MIMEHeader)
-		w.req.Header.Set("Connection", "close")
+		w.req.Header = textproto.MIMEHeader{
+			"Connection": {"close"},
+			}
 	}
 
 	c.handler.ServeICAP(w, w.req)
