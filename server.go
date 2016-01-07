@@ -67,8 +67,11 @@ func (c *conn) readRequest() (w *respWriter, err error) {
 		//return req, err
 		;
 	}
-
-	req.RemoteAddr = c.remoteAddr
+	if req == nil {
+		req = new(Request)
+	} else {
+		req.RemoteAddr = c.remoteAddr
+	}
 
 	w = new(respWriter)
 	w.conn = c
