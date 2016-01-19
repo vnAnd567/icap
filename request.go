@@ -169,7 +169,7 @@ func ReadRequest(b *bufio.ReadWriter) (req *Request, err error) {
 	if rawReqHdr != nil {
 		invalidUrlEscapeFixed := false
 		req.Request, err = http.ReadRequest(bufio.NewReader(bytes.NewBuffer(rawReqHdr)))
-		if err != nil && strings.HasPrefix(err.Error(), "invalid URL escape") {
+		if err != nil && strings.Contains(err.Error(), "invalid URL escape") {
 			//Fix the request url
 			// Convert the rawReqHdr to string
 			// find the url\path start and end(sould be in the status line
@@ -179,12 +179,13 @@ func ReadRequest(b *bufio.ReadWriter) (req *Request, err error) {
 			result := strings.Split(rawReqHdrStr, "\n")
 			result[0] = strings.Replace(result[0], "%", "%25", -1)
 			newReq := strings.Join(result, "\r\n")
+			fmt.Println("Replaced the percents in the request line")
 			req.Request, err = http.ReadRequest(bufio.NewReader(bytes.NewBuffer([]byte(newReq))))
 			if err != nil {
 				return req, fmt.Errorf("error while parsing HTTP request: %v", err)
 			}
 			invalidUrlEscapeFixed = true
-
+			fmt.Println("Finished fix of the percentage")
 		}
 		if err != nil && !invalidUrlEscapeFixed {
 			return req, fmt.Errorf("error while parsing HTTP request: %v", err)
