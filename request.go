@@ -178,14 +178,13 @@ func ReadRequest(b *bufio.ReadWriter) (req *Request, err error) {
 			rawReqHdrStr := string(rawReqHdr)
 			result := strings.Split(rawReqHdrStr, "\n")
 			result[0] = strings.Replace(result[0], "%", "%25", -1)
+			// The next is a compromise since when adding "\r\n" it causes the request parsing to fail
 			newReq := strings.Join(result, "\n")
-			fmt.Println("Replaced the percents in the request line")
 			req.Request, err = http.ReadRequest(bufio.NewReader(bytes.NewBuffer([]byte(newReq))))
 			if err != nil {
 				return req, fmt.Errorf("error while parsing HTTP request: %v", err)
 			}
 			invalidUrlEscapeFixed = true
-			fmt.Println("Finished fix of the percentage")
 		}
 		if err != nil && !invalidUrlEscapeFixed {
 			return req, fmt.Errorf("error while parsing HTTP request: %v", err)
