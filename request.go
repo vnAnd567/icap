@@ -169,7 +169,7 @@ func ReadRequest(b *bufio.ReadWriter) (req *Request, err error) {
 	if rawReqHdr != nil {
 		invalidUrlEscapeFixed := false
 		req.Request, err = http.ReadRequest(bufio.NewReader(bytes.NewBuffer(rawReqHdr)))
-		if strings.HasPrefix(err.Error(), "invalid URL escape") {
+		if err != nil && strings.HasPrefix(err.Error(), "invalid URL escape") {
 			//Fix the request url
 			// Convert the rawReqHdr to string
 			// find the url\path start and end(sould be in the status line
