@@ -178,7 +178,7 @@ func ReadRequest(b *bufio.ReadWriter) (req *Request, err error) {
 			rawReqHdrStr := string(rawReqHdr)
 			result := strings.Split(rawReqHdrStr, "\n")
 			result[0] = strings.Replace(result[0], "%", "%25", -1)
-			newReq := strings.Join(result, "\r\n")
+			newReq := strings.Join(result, "\n")
 			fmt.Println("Replaced the percents in the request line")
 			req.Request, err = http.ReadRequest(bufio.NewReader(bytes.NewBuffer([]byte(newReq))))
 			if err != nil {
