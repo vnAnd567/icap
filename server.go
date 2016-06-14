@@ -9,12 +9,13 @@ package icap
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"net/textproto"
+	"net/url"
 	"runtime/debug"
 	"time"
 )
@@ -65,7 +66,7 @@ func (c *conn) readRequest() (w *respWriter, err error) {
 	var req *Request
 	if req, err = ReadRequest(c.buf); err != nil {
 		//return req, err
-		;
+
 	}
 	if req == nil {
 		req = new(Request)
@@ -116,13 +117,13 @@ func (c *conn) serve() {
 		log.Println("error while reading request:", w.conn)
 		log.Println("error while reading request:", w.req)
 		log.Println("error while reading request:", w.header)
-	
-//		c.rwc.Close()
-//		return
+
+		//		c.rwc.Close()
+		//		return
 		if w == nil {
 			w = new(respWriter)
 		}
-		w.conn =  c
+		w.conn = c
 		w.req = new(Request)
 		w.req.Method = "ERRDUMMY"
 		w.req.RawURL = "/"
@@ -130,7 +131,7 @@ func (c *conn) serve() {
 		w.req.URL, _ = url.ParseRequestURI("icap://localhost/")
 		w.req.Header = textproto.MIMEHeader{
 			"Connection": {"close"},
-			}
+		}
 	}
 
 	c.handler.ServeICAP(w, w.req)
@@ -156,6 +157,25 @@ func (srv *Server) ListenAndServe() error {
 		addr = ":1344"
 	}
 	l, e := net.Listen("tcp", addr)
+	if e != nil {
+		return e
+	}
+	return srv.Serve(l)
+}
+
+func (srv *Server) ListenAndServeTls(cert, key string) error {
+
+	cer, err := tls.LoadX509KeyPair(cert, key)
+	if err != nil {
+		return err
+	}
+	addr := srv.Addr
+	if addr == "" {
+		addr = ":1344"
+	}
+
+	config := &tls.Config{Certificates: []tls.Certificate{cer}}
+	l, e := tls.Listen("tcp", addr, config)
 	if e != nil {
 		return e
 	}
@@ -210,4 +230,8 @@ func Serve(l net.Listener, handler Handler) error {
 func ListenAndServe(addr string, handler Handler) error {
 	server := &Server{Addr: addr, Handler: handler}
 	return server.ListenAndServe()
+}
+func ListenAndServeTls(addr, cert, key string, handler Handler) error {
+	server := &Server{Addr: addr, Handler: handler}
+	return server.ListenAndServeTls(cert, key)
 }
