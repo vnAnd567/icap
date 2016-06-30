@@ -211,7 +211,7 @@ func httpResponseHeader(resp *http.Response) (hdr []byte, err error) {
 	} else {
 		resp.Header.WriteSubset(buf, map[string]bool{
 			"Transfer-Encoding": true,
-			"Content-Length":    true,
+			"Content-Length":    false,
 		})
 	}
 	io.WriteString(buf, "\r\n")
