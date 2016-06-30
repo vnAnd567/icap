@@ -70,7 +70,7 @@ func ServeLocally(w ResponseWriter, req *Request) {
 	http.DefaultServeMux.ServeHTTP(brw, req.Request)
 }
 
-func ServeLocallyFromHandler(w ResponseWriter, req *Request, localHandler http.Handler) {
+func ServeLocallyFromMux(w ResponseWriter, req *Request, mux http.ServeMux) {
 	brw := NewBridgedResponseWriter(w)
-	localHandler.ServeHTTP(brw, req.Request)
+	mux.ServeHTTP(brw, req.Request)
 }
