@@ -55,7 +55,7 @@ func (w *bridgedRespWriter) WriteHeader(code int) {
 	w.irw.WriteHeader(200, resp, true)
 }
 
-// Create an http.ResponseWriter that encapsulates its response in an ICAP response.
+// NewBridgedResponseWriter Create an http.ResponseWriter that encapsulates its response in an ICAP response.
 func NewBridgedResponseWriter(w ResponseWriter) http.ResponseWriter {
 	rw := new(bridgedRespWriter)
 	rw.header = make(http.Header)
@@ -64,12 +64,13 @@ func NewBridgedResponseWriter(w ResponseWriter) http.ResponseWriter {
 	return rw
 }
 
-// Pass use the local HTTP server to generate a response for an ICAP request.
+// ServeLocally Pass use the local HTTP server to generate a response for an ICAP request.
 func ServeLocally(w ResponseWriter, req *Request) {
 	brw := NewBridgedResponseWriter(w)
 	http.DefaultServeMux.ServeHTTP(brw, req.Request)
 }
 
+// ServeLocallyFromHandler ---
 func ServeLocallyFromHandler(w ResponseWriter, req *Request, mux http.Handler) {
 	brw := NewBridgedResponseWriter(w)
 	mux.ServeHTTP(brw, req.Request)

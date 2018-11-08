@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-// Objects implementing the Handler interface can be registered
+// Handler Objects implementing the Handler interface can be registered
 // to serve ICAP requests.
 //
 // ServeICAP should write reply headers and data to the ResponseWriter
@@ -94,7 +94,7 @@ func (c *conn) close() {
 }
 
 // Serve a new connection.
-func (c *conn) serve() {
+func (c *conn) serve(debugLevel int) {
 	defer func() {
 		err := recover()
 		if err == nil {
@@ -112,12 +112,13 @@ func (c *conn) serve() {
 	// In a case of parsing error there should be an option to handle a dummy request to not fail the whole service.
 
 	if err != nil {
-		log.Println("error while reading request:", err)
-		log.Println("error while reading request:", w)
-		log.Println("error while reading request:", w.conn)
-		log.Println("error while reading request:", w.req)
-		log.Println("error while reading request:", w.header)
-
+		if debugLevel > 0 {
+			log.Println("error while reading request:", err)
+			log.Println("error while reading request:", w)
+			log.Println("error while reading request:", w.conn)
+			log.Println("error while reading request:", w.req)
+			log.Println("error while reading request:", w.header)
+		}
 		//		c.rwc.Close()
 		//		return
 		if w == nil {
@@ -131,6 +132,7 @@ func (c *conn) serve() {
 		w.req.URL, _ = url.ParseRequestURI("icap://localhost/")
 		w.req.Header = textproto.MIMEHeader{
 			"Connection": {"close"},
+			// "Error:":     {err.Error()},
 		}
 	}
 
@@ -146,6 +148,7 @@ type Server struct {
 	Handler      Handler // handler to invoke
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
+	DebugLevel   int
 }
 
 // ListenAndServe listens on the TCP network address srv.Addr and then
@@ -156,14 +159,15 @@ func (srv *Server) ListenAndServe() error {
 	if addr == "" {
 		addr = ":1344"
 	}
-	l, e := net.Listen("tcp", addr)
-	if e != nil {
-		return e
+	l, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
 	}
 	return srv.Serve(l)
 }
 
-func (srv *Server) ListenAndServeTls(cert, key string) error {
+// ListenAndServeTLS ---
+func (srv *Server) ListenAndServeTLS(cert, key string) error {
 
 	cer, err := tls.LoadX509KeyPair(cert, key)
 	if err != nil {
@@ -175,9 +179,9 @@ func (srv *Server) ListenAndServeTls(cert, key string) error {
 	}
 
 	config := &tls.Config{Certificates: []tls.Certificate{cer}}
-	l, e := tls.Listen("tcp", addr, config)
-	if e != nil {
-		return e
+	l, err := tls.Listen("tcp", addr, config)
+	if err != nil {
+		return err
 	}
 	return srv.Serve(l)
 }
@@ -193,13 +197,13 @@ func (srv *Server) Serve(l net.Listener) error {
 	}
 
 	for {
-		rw, e := l.Accept()
-		if e != nil {
-			if ne, ok := e.(net.Error); ok && ne.Temporary() {
-				log.Printf("icap: Accept error: %v", e)
+		rw, err := l.Accept()
+		if err != nil {
+			if ne, ok := err.(net.Error); ok && ne.Temporary() {
+				log.Printf("icap: Accept error: %v", err)
 				continue
 			}
-			return e
+			return err
 		}
 		if srv.ReadTimeout != 0 {
 			rw.SetReadDeadline(time.Now().Add(srv.ReadTimeout))
@@ -211,9 +215,10 @@ func (srv *Server) Serve(l net.Listener) error {
 		if err != nil {
 			continue
 		}
-		go c.serve()
+		go c.serve(srv.DebugLevel)
 	}
-	panic("not reached")
+	// The next line is only there to see one specific edge case whichc should never happen.
+	panic("Shuold never be reached")
 }
 
 // Serve accepts incoming ICAP connections on the listener l,
@@ -231,7 +236,9 @@ func ListenAndServe(addr string, handler Handler) error {
 	server := &Server{Addr: addr, Handler: handler}
 	return server.ListenAndServe()
 }
-func ListenAndServeTls(addr, cert, key string, handler Handler) error {
+
+// ListenAndServeTLS --
+func ListenAndServeTLS(addr, cert, key string, handler Handler) error {
 	server := &Server{Addr: addr, Handler: handler}
-	return server.ListenAndServeTls(cert, key)
+	return server.ListenAndServeTLS(cert, key)
 }

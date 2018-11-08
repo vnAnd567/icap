@@ -167,7 +167,7 @@ func ReadRequest(b *bufio.ReadWriter) (req *Request, err error) {
 
 	// Construct the http.Request.
 	if rawReqHdr != nil {
-		invalidUrlEscapeFixed := false
+		invalidURLEscapeFixed := false
 		req.Request, err = http.ReadRequest(bufio.NewReader(bytes.NewBuffer(rawReqHdr)))
 		if err != nil && strings.Contains(err.Error(), "invalid URL escape") {
 			//Fix the request url
@@ -184,9 +184,9 @@ func ReadRequest(b *bufio.ReadWriter) (req *Request, err error) {
 			if err != nil {
 				return req, fmt.Errorf("error while parsing HTTP request: %v", err)
 			}
-			invalidUrlEscapeFixed = true
+			invalidURLEscapeFixed = true
 		}
-		if err != nil && !invalidUrlEscapeFixed {
+		if err != nil && !invalidURLEscapeFixed {
 			return req, fmt.Errorf("error while parsing HTTP request: %v", err)
 		}
 

@@ -19,6 +19,7 @@ import (
 	"time"
 )
 
+// ResponseWriter ---
 type ResponseWriter interface {
 	// Header returns the header map that will be sent by WriteHeader.
 	// Changing the header after a call to WriteHeader (or Write) has
@@ -29,7 +30,7 @@ type ResponseWriter interface {
 	// If WriteHeader has not yet been called, Write calls WriteHeader(http.StatusOK, nil)
 	// before writing the data.
 	Write([]byte) (int, error)
-	
+
 	// Write raw data to the connection.
 	WriteRaw(string)
 
@@ -45,7 +46,7 @@ type respWriter struct {
 	req         *Request       // the request that is being responded to
 	header      http.Header    // the ICAP header to write for the response
 	wroteHeader bool           // true if the headers have already been written
-	wroteRaw    bool	   // true if raw data was written to the connection
+	wroteRaw    bool           // true if raw data was written to the connection
 	cw          io.WriteCloser // the chunked writer used to write the body
 }
 
@@ -206,7 +207,7 @@ func httpResponseHeader(resp *http.Response) (hdr []byte, err error) {
 		proto = "HTTP/1.1"
 	}
 	fmt.Fprintf(buf, "%s %d %s\r\n", proto, resp.StatusCode, text)
-	if _, xIcap206Exists:= resp.Header["X-Icap-206"] ; xIcap206Exists {
+	if _, xIcap206Exists := resp.Header["X-Icap-206"]; xIcap206Exists {
 		resp.Header.Write(buf)
 	} else {
 		resp.Header.WriteSubset(buf, map[string]bool{

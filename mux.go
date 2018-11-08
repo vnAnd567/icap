@@ -15,7 +15,7 @@ import (
 // It matches the URL of each incoming request against a list of registered
 // patterns and calls the handler for the pattern that
 // most closely matches the URL.
-// 
+//
 // For more details, see the documentation for http.ServeMux
 type ServeMux struct {
 	m map[string]Handler
@@ -149,14 +149,14 @@ func (rh *redirectHandler) ServeICAP(w ResponseWriter, r *Request) {
 // RedirectHandler returns a request handler that redirects
 // each request it receives to the given url using the given
 // status code.
-func RedirectHandler(url_ string, code int) Handler {
-	return &redirectHandler{url_, code}
+func RedirectHandler(redirectURL string, code int) Handler {
+	return &redirectHandler{redirectURL, code}
 }
 
 // Redirect replies to the request with a redirect to url,
 // which may be a path relative to the request path.
-func Redirect(w ResponseWriter, r *Request, url_ string, code int) {
-	if u, err := url.Parse(url_); err == nil {
+func Redirect(w ResponseWriter, r *Request, redirectURL string, code int) {
+	if u, err := url.Parse(redirectURL); err == nil {
 		// If url was relative, make absolute by
 		// combining with request path.
 		// The browser would probably do this for us,
@@ -167,27 +167,27 @@ func Redirect(w ResponseWriter, r *Request, url_ string, code int) {
 		}
 		if u.Scheme == "" {
 			// no leading icap://server
-			if url_ == "" || url_[0] != '/' {
+			if redirectURL == "" || redirectURL[0] != '/' {
 				// make relative path absolute
 				olddir, _ := path.Split(oldpath)
-				url_ = olddir + url_
+				redirectURL = olddir + redirectURL
 			}
 
 			var query string
-			if i := strings.Index(url_, "?"); i != -1 {
-				url_, query = url_[:i], url_[i:]
+			if i := strings.Index(redirectURL, "?"); i != -1 {
+				redirectURL, query = redirectURL[:i], redirectURL[i:]
 			}
 
 			// clean up but preserve trailing slash
-			trailing := url_[len(url_)-1] == '/'
-			url_ = path.Clean(url_)
-			if trailing && url_[len(url_)-1] != '/' {
-				url_ += "/"
+			trailing := redirectURL[len(redirectURL)-1] == '/'
+			redirectURL = path.Clean(redirectURL)
+			if trailing && redirectURL[len(redirectURL)-1] != '/' {
+				redirectURL += "/"
 			}
-			url_ += query
+			redirectURL += query
 		}
 	}
 
-	w.Header().Set("Location", url_)
+	w.Header().Set("Location", redirectURL)
 	w.WriteHeader(code, nil, false)
 }
