@@ -143,7 +143,7 @@ func ReadRequest(b *bufio.ReadWriter) (req *Request, err error) {
 
 	var bodyReader io.ReadCloser = emptyReader(0)
 	if hasBody {
-		if p := req.Header.Get("Preview"); p != "" {
+		if p := req.Header.Get("Preview"); p != "" && p != "0" {
 			moreBody := true
 			req.Preview, err = ioutil.ReadAll(newChunkedReader(b))
 			if err != nil {
