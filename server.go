@@ -95,18 +95,17 @@ func (c *conn) close() {
 // Serve a new connection.
 func (c *conn) serve(debugLevel int) {
 	defer func() {
-		for {
-			err := recover()
-			if err == nil {
-				return
-			}
 
-			var buf bytes.Buffer
-			fmt.Fprintf(&buf, "icap: panic serving %v: %v\n", c.remoteAddr, err)
-			buf.Write(debug.Stack())
-			log.Print(buf.String())
-
+		err := recover()
+		if err == nil {
+			return
 		}
+
+		var buf bytes.Buffer
+		fmt.Fprintf(&buf, "icap: panic serving %v: %v\n", c.remoteAddr, err)
+		buf.Write(debug.Stack())
+		log.Print(buf.String())
+
 	}()
 	for {
 		var w *respWriter
