@@ -65,7 +65,7 @@ func newConn(rwc net.Conn, handler Handler) (c *conn, err error) {
 func (c *conn) readRequest() (w *respWriter, err error) {
 	var req *Request
 	if req, err = ReadRequest(c.buf); err != nil {
-		//return req, err
+		return nil, err
 
 	}
 	if req == nil {
@@ -107,37 +107,28 @@ func (c *conn) serve(debugLevel int) {
 		buf.Write(debug.Stack())
 		log.Print(buf.String())
 	}()
-	var w *respWriter
-	w, err := c.readRequest()
-	// In a case of parsing error there should be an option to handle a dummy request to not fail the whole service.
-
-	if err != nil {
-		if debugLevel > 0 {
-			log.Println("error while reading request:", err)
-			log.Println("error while reading request:", w)
-			log.Println("error while reading request:", w.conn)
-			log.Println("error while reading request:", w.req)
-			log.Println("error while reading request:", w.header)
-		}
-		//		c.rwc.Close()
-		//		return
+	for {
+		var w *respWriter
+		w, err := c.readRequest()
+		// In a case of parsing error there should be an option to handle a dummy request to not fail the whole service.
 		if w == nil {
-			w = new(respWriter)
-		}
-		w.conn = c
-		w.req = new(Request)
-		w.req.Method = "ERRDUMMY"
-		w.req.RawURL = "/"
-		w.req.Proto = "ICAP/1.0"
-		w.req.URL, _ = url.ParseRequestURI("icap://localhost/")
-		w.req.Header = textproto.MIMEHeader{
-			"Connection": {"close"},
-			// "Error:":     {err.Error()},
-		}
-	}
+			fmt.Println("close")
+			w.finishRequest()
+			c.rwc.Close()
 
-	c.handler.ServeICAP(w, w.req)
-	w.finishRequest()
+			break
+		}
+		if err != nil {
+
+			log.Println("error while reading request:", err)
+			c.rwc.Close()
+			break
+
+		}
+
+		c.handler.ServeICAP(w, w.req)
+		w.finishRequest()
+	}
 
 	c.close()
 }
