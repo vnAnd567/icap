@@ -113,7 +113,6 @@ func (c *conn) serve(debugLevel int) {
 		w, err := c.readRequest()
 		// In a case of parsing error there should be an option to handle a dummy request to not fail the whole service.
 		if w == nil {
-			fmt.Println("close")
 			c.rwc.Close()
 
 			break
