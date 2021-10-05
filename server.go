@@ -95,16 +95,18 @@ func (c *conn) close() {
 // Serve a new connection.
 func (c *conn) serve(debugLevel int) {
 	defer func() {
-		err := recover()
-		if err == nil {
-			return
-		}
-		c.rwc.Close()
+		for {
+			err := recover()
+			if err == nil {
+				return
+			}
 
-		var buf bytes.Buffer
-		fmt.Fprintf(&buf, "icap: panic serving %v: %v\n", c.remoteAddr, err)
-		buf.Write(debug.Stack())
-		log.Print(buf.String())
+			var buf bytes.Buffer
+			fmt.Fprintf(&buf, "icap: panic serving %v: %v\n", c.remoteAddr, err)
+			buf.Write(debug.Stack())
+			log.Print(buf.String())
+
+		}
 	}()
 	for {
 		var w *respWriter
@@ -112,7 +114,6 @@ func (c *conn) serve(debugLevel int) {
 		// In a case of parsing error there should be an option to handle a dummy request to not fail the whole service.
 		if w == nil {
 			fmt.Println("close")
-			w.finishRequest()
 			c.rwc.Close()
 
 			break
