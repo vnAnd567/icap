@@ -146,7 +146,7 @@ func ReadRequest(b *bufio.ReadWriter) (req *Request, err error) {
 		if p := req.Header.Get("Preview"); p != "" {
 			moreBody := false
 			
-			if previewSize, err := strconv.Atoi(p); err != nil && previewSize > 0 {
+			if previewSize, err := strconv.Atoi(p); err == nil && previewSize > 0 {
 				moreBody = true
 			}
 			
