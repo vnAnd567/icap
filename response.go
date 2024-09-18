@@ -182,7 +182,7 @@ func httpRequestHeader(req *http.Request) (hdr []byte, err error) {
 	fmt.Fprintf(buf, "%s %s %s\r\n", valueOrDefault(req.Method, "GET"), uri, valueOrDefault(req.Proto, "HTTP/1.1"))
 	req.Header.WriteSubset(buf, map[string]bool{
 		"Transfer-Encoding": true,
-		"Content-Length":    true,
+		"Content-Length":    false,
 	})
 	io.WriteString(buf, "\r\n")
 
